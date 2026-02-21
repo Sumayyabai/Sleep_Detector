@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SleepGuard AI — Sleep Detection System</title>
+    <meta name="description" content="AI-powered sleep detection using Groq Vision API. Detects if a person is sleeping via webcam or image upload and sounds an alarm.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Header -->
+    <header id="site-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="16" stroke="url(#grad)" stroke-width="2.5"/>
+                        <path d="M14 22C14 22 16 26 20 26C24 26 26 22 26 22" stroke="url(#grad)" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="15" cy="17" r="1.5" fill="#818cf8"/>
+                        <circle cx="25" cy="17" r="1.5" fill="#818cf8"/>
+                        <path d="M12 14C12 14 13 12 15 12" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M28 14C28 14 27 12 25 12" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="grad" x1="4" y1="4" x2="36" y2="36">
+                                <stop stop-color="#818cf8"/>
+                                <stop offset="1" stop-color="#c084fc"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1>SleepGuard <span class="accent">AI</span></h1>
+            </div>
+            <div class="header-badge">
+                <span class="pulse-dot"></span>
+                Powered by Groq Vision
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app-main">
+        <!-- Mode Selector -->
+        <section class="mode-selector" id="mode-selector">
+            <button class="mode-btn active" id="btn-webcam" onclick="switchMode('webcam')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                Live Webcam
+            </button>
+            <button class="mode-btn" id="btn-upload" onclick="switchMode('upload')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload Image
+            </button>
+        </section>
+
+        <!-- Content Area -->
+        <div class="content-grid">
+            <!-- Left Panel: Camera / Upload -->
+            <section class="panel panel-input" id="panel-input">
+                <!-- Webcam Mode -->
+                <div class="webcam-container" id="webcam-section">
+                    <div class="video-wrapper" id="video-wrapper">
+                        <video id="webcam-video" autoplay playsinline muted></video>
+                        <canvas id="capture-canvas" style="display:none;"></canvas>
+                        <div class="video-overlay" id="video-overlay">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            <p>Click to start webcam</p>
+                        </div>
+                    </div>
+                    <div class="webcam-controls">
+                        <button class="btn btn-primary" id="btn-start-webcam" onclick="startWebcam()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                            Start Webcam
+                        </button>
+                        <button class="btn btn-secondary" id="btn-capture" onclick="captureAndDetect()" disabled>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                            Capture & Detect
+                        </button>
+                        <label class="toggle-container" id="auto-toggle">
+                            <input type="checkbox" id="auto-detect-toggle" onchange="toggleAutoDetect()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Auto Detect (3s)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Upload Mode -->
+                <div class="upload-container hidden" id="upload-section">
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="file-input" accept="image/*" onchange="handleFileUpload(event)" hidden>
+                        <div class="upload-placeholder" id="upload-placeholder" onclick="document.getElementById('file-input').click()">
+                            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <p>Drop image here or <span class="accent">browse</span></p>
+                            <span class="upload-hint">Supports JPG, PNG, WebP</span>
+                        </div>
+                        <img id="upload-preview" class="upload-preview hidden" alt="Uploaded image preview"/>
+                    </div>
+                    <button class="btn btn-primary" id="btn-detect-upload" onclick="detectFromUpload()" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        Analyze Image
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results -->
+            <section class="panel panel-results" id="panel-results">
+                <h2 class="panel-title">Detection Result</h2>
+
+                <!-- Status Display -->
+                <div class="status-display" id="status-display">
+                    <div class="status-icon-container" id="status-icon-container">
+                        <div class="status-icon waiting" id="status-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="status-text" id="status-text">Waiting for image...</div>
+                    <div class="status-confidence" id="status-confidence"></div>
+                </div>
+
+                <!-- Details -->
+                <div class="result-details hidden" id="result-details">
+                    <h3>Analysis Details</h3>
+                    <p id="result-details-text"></p>
+                </div>
+
+                <!-- Alarm Controls -->
+                <div class="alarm-section hidden" id="alarm-section">
+                    <div class="alarm-indicator" id="alarm-indicator">
+                        <span class="alarm-pulse"></span>
+                        <span class="alarm-text">⚠ ALARM ACTIVE</span>
+                    </div>
+                    <button class="btn btn-danger" id="btn-stop-alarm" onclick="stopAlarm()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                        Stop Alarm
+                    </button>
+                </div>
+
+                <!-- History -->
+                <div class="history-section">
+                    <h3>Recent Detections</h3>
+                    <div class="history-list" id="history-list">
+                        <div class="history-empty">No detections yet</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="site-footer">
+        <p>Built with <span class="accent">♥</span> for Hackathon — Powered by <strong>Groq API</strong> & <strong>Llama 4 Scout Vision</strong></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/static/js/beep.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
