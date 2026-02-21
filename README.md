@@ -1,3 +1,6 @@
+team name : hackers
+team members: niveditha s, sumayya bai 
+collage of engineering karunagappaly
 # Sleep Detector
 
 Lightweight Flask web app that uses Groq Vision (Llama 4 Scout) to analyze images and detect whether a person appears to be sleeping.
@@ -69,7 +72,13 @@ Security & secrets
 Notes & next steps
 - If you plan to deploy, use server-side environment variables (not checked-in files), and consider adding rate-limiting, authentication, and usage logging.
 - If the repository history contained secrets, follow the GitHub guidance to remove them from the history and rotate keys.
+![0c42e1d0-5cce-48bd-a7fe-8d35013758dc](https://github.com/user-attachments/assets/81899524-a5b9-458e-bf8f-e35d70d0ff28)
+![712f7482-95fb-480d-b8e6-52465c229c39](https://github.com/user-attachments/assets/95e0ae91-bc5f-4645-9d6b-4dd6db0379e9)
+
+video link:
+https://drive.google.com/file/d/1N-FBXaB4Z1uLVGRpOOlRfePkyb5RRaSL/view?usp=drive_link
 
 License
 - (Add license information here if desired)
 # Sleep_Detector 
+
